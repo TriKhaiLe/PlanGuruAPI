@@ -8,7 +8,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using PlanGuruAPI.DTOs;
+using PlanGuruAPI.DTOs.UserDTOs;
 using System.Diagnostics.Eventing.Reader;
 
 namespace PlanGuruAPI.Controllers
@@ -51,7 +51,49 @@ namespace PlanGuruAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllUser()
         {
-            return Ok(await _context.Users.ToListAsync());
+            return Ok(await _context.Users.Select(p => new {p.UserId, p.Name, p.Avatar, p.Email, p.IsHavePremium}).ToListAsync());
+        }
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetUserById(Guid userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if(user == null)
+            {
+                return NotFound("Can't find this user");
+            }
+            return Ok(new { user.UserId, user.Name, user.Avatar, user.Email, user.IsHavePremium });
+        }
+        [HttpPost("goPremium")]
+        public async Task<IActionResult> GoPremium(Guid userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if(user == null)
+            {
+                return NotFound("Can't find this user");
+            }
+            if (user.IsHavePremium)
+            {
+                return BadRequest("This user is already have premium");
+            }
+            user.IsHavePremium = true;
+            await _context.SaveChangesAsync();
+            return Ok("Upgrade account successfully");
+        }
+        [HttpPost("removePremium")]
+        public async Task<IActionResult> RemovePremium(Guid userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return NotFound("Can't find this user");
+            }
+            if (!user.IsHavePremium)
+            {
+                return BadRequest("This user don't have premium");
+            }
+            user.IsHavePremium = false;
+            await _context.SaveChangesAsync();
+            return Ok("Remove premium from this account successfully");
         }
     }
 }

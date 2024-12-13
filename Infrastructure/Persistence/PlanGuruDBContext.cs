@@ -30,14 +30,14 @@ namespace Infrastructure.Persistence
         public DbSet<ContentSection> ContentSections { get; set; }
         public DbSet<Vote> Votes { get; set; }
 
+        public DbSet<Group> Groups { get; set; }
+        public DbSet<GroupUser> GroupUsers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new UserConfiguration());
             modelBuilder.ApplyConfiguration(new PostConfiguration());
-            modelBuilder.ApplyConfiguration(new CommentConfiguration());
-            modelBuilder.ApplyConfiguration(new ChatRoomConfiguration());
-            modelBuilder.ApplyConfiguration(new ChatMessageConfiguration());     
+            modelBuilder.ApplyConfiguration(new CommentConfiguration()); 
             modelBuilder.ApplyConfiguration(new PostUpvoteConfiguration());
             modelBuilder.ApplyConfiguration(new PostDevoteConfiguration());
             modelBuilder.ApplyConfiguration(new CommentUpvoteConfiguration());
@@ -45,6 +45,17 @@ namespace Infrastructure.Persistence
             modelBuilder.ApplyConfiguration(new PostShareConfiguration());
             modelBuilder.ApplyConfiguration(new ChatImagesAndVideosConfiguration());
             modelBuilder.ApplyConfiguration(new ContentSectionConfiguration());
+            modelBuilder.ApplyConfiguration(new GroupConfiguration());  
+            modelBuilder.ApplyConfiguration(new GroupUserConfiguration());  
+
+            modelBuilder.Entity<ChatRoom>()
+                .HasKey(p => p.ChatRoomId);
+            modelBuilder.Entity<ChatRoom>()
+                .HasMany(p => p.ChatMessages)
+                .WithOne(p => p.ChatRoom)
+                .HasForeignKey(p => p.ChatRoomId);
+            modelBuilder.Entity<ChatMessage>()
+                .HasKey(p => p.ChatMessageId);  
 
             modelBuilder.Entity<Comment>(entity =>
             {

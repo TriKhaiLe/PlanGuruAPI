@@ -49,7 +49,14 @@ namespace PlanGuruAPI.Controllers
         [HttpGet("test/get-all")]
         public async Task<IActionResult> GetAllPlantPosts()
         {
-            return Ok(await _context.Posts.ToListAsync());
+            return Ok(await _postRepository.GetApprovedPost());
+        }
+        [HttpGet("plantPostUserCount")]
+        public async Task<IActionResult> GetPlantPostUserCount()
+        {
+            var users = await _context.Users.ToListAsync();
+            var posts = await _context.Posts.ToListAsync();
+            return Ok(new { numberOfUser = users.Count, numberOfPost = posts.Count });
         }
 
         [HttpGet]

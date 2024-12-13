@@ -46,6 +46,7 @@ namespace PlanGuruAPI
                 });
             });
             builder.Services.AddApplication().AddInfrastructure();
+            builder.Services.AddControllers();
 
             builder.Services.AddAutoMapper(typeof(Program));
 

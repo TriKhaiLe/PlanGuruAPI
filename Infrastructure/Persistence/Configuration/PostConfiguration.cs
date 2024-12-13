@@ -15,6 +15,8 @@ namespace Infrastructure.Persistence.Configuration
         {
             builder.HasKey(p => p.Id);
 
+            builder.Property(p => p.GroupId).IsRequired(false);
+
             builder.HasMany(p => p.PostUpvotes)
                 .WithOne(p => p.Post)
                 .HasForeignKey(p => p.PostId);
@@ -26,6 +28,8 @@ namespace Infrastructure.Persistence.Configuration
             builder.HasMany(p => p.PostShares)
                 .WithOne(p => p.Post)
                 .HasForeignKey(p => p.PostId);
+
+
         }
     }
 }

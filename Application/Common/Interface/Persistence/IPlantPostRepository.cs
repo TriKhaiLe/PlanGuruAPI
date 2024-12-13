@@ -10,9 +10,13 @@ namespace Application.Common.Interface.Persistence
     public interface IPlantPostRepository
     {
         Task<Post> CreatePostAsync(Post post);
+        Task<Post> GetPostByIdAsync(Guid postId);
         IQueryable<Post> QueryPosts();
         Task UpdatePostAsync(Post post);
         Task DeletePostAsync(Guid postId);
+        Task ApprovePostByAdmin(Post post);
+        Task<List<Post>> GetUnApprovedPost();
+        Task<List<Post>> GetApprovedPost();
 
         Task AddPostUpvoteAsync(PostUpvote postUpvote);
         Task RemovePostUpvoteAsync(PostUpvote postUpvote);

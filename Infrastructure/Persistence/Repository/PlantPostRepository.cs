@@ -86,5 +86,44 @@ namespace Infrastructure.Persistence.Repository
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task ApprovePostByAdmin(Post post)
+        {
+            post.IsApproved = true;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<Post> GetPostByIdAsync(Guid postId)
+        {
+            var post = await _context.Posts.FindAsync(postId);
+            if(post == null)
+            {
+                throw new Exception("Can't find this post");
+            }
+            return post;
+        }
+
+        public async Task<List<Post>> GetUnApprovedPost()
+        {
+            var listPost = await _context.Posts.Where(
+                p => p.IsApproved == false)
+                .Include(p => p.PostComments)
+                .Include(p => p.PostDevotes)
+                .Include(p => p.PostComments)
+                .Include(p => p.PostShares)
+                .ToListAsync();
+            return listPost;
+        }
+
+        public async Task<List<Post>> GetApprovedPost()
+        {
+            return await _context.Posts.Where(
+                p => p.IsApproved == true)
+                .Include(p => p.PostComments)
+                .Include(p => p.PostDevotes)
+                .Include(p => p.PostComments)
+                .Include(p => p.PostShares)
+                .ToListAsync();
+        }
     }
 }

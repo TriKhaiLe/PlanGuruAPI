@@ -62,9 +62,9 @@ namespace Infrastructure
                             UserId = firstUser.UserId,
                             Title = $"Post Title {i + 1}",
                             Description = $"This is the description for post {i + 1}.",
-                            ImageUrl = $"image{i + 1}.png",
+                            ImageUrl = "https://i.pinimg.com/736x/d9/95/e3/d995e3f52c60ff8bc39f0ae2303bec6f.jpg",
                             Tag = "Plants",
-                            Background = "background.png"
+                            Background = "https://i.pinimg.com/736x/6b/8d/55/6b8d557af9e7122dbd7eec1c2593232b.jpg",
                         };
                         context.Posts.Add(post);
                     }

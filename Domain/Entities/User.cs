@@ -20,13 +20,18 @@ namespace Domain.Entities
         public string Email { get; set; }
         public string Avatar { get; set; }
         public string Password { get; set; }
+        public bool IsHavePremium { get; set; }        
         public ICollection<Post> Posts { get; set; }    
         public ICollection<Comment> Comments { get; set; }
         public ICollection<PostDevote> PostDevotes { get; set; }
         public ICollection<PostUpvote> PostUpvotes { get; set; }
+
         public ICollection<PostShare> PostShares { get; set; }
         public ICollection<Product> Products { get; set; }
         public ICollection<Vote> Votes { get; set; } // Add this line
+        public ICollection<PostShare> PostShares { get; set; }      
+        public ICollection<GroupUser> ListGroup { get; set; }  
+        public ICollection<Group> ListOwnGroup { get; set; }
 
     }
 }
