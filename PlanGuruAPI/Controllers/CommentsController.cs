@@ -1,7 +1,7 @@
 ﻿using Application.Comments.Command;
 using Application.Common.Interface.Persistence;
 using Application.PlantPosts.Query.GetPlantPosts;
-using Application.Votes;
+using Application.Votes.factory;
 using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
