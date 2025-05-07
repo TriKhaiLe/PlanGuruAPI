@@ -1,12 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Application.Votes.strategy;
+using System;
 
 namespace Application.Votes.factory
 {
-    internal class PostVoteStrategyFactory
+    public class PostVoteStrategyFactory : VoteStrategyAbstractFactory
     {
+        public PostVoteStrategyFactory(IServiceProvider serviceProvider)
+            : base(serviceProvider)
+        {}
+
+        public override IVoteStrategy CreateStrategy()
+        {
+            return _serviceProvider.GetService(typeof(PostVoteStrategy)) as IVoteStrategy 
+                       ?? throw new InvalidOperationException("Service not found: PostVoteStrategy");
+        }
     }
 }
