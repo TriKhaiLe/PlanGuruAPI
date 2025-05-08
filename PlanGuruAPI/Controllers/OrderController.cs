@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Domain.Entities.ECommerce;
 using Infrastructure.Persistence;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PlanGuruAPI.DTOs.OrderDTOs;
@@ -74,45 +73,60 @@ namespace PlanGuruAPI.Controllers
             var newOrder = _mapper.Map<Order>(order);   
             newOrder.Id = Guid.NewGuid();   
             newOrder.TotalPrice = order.Quantity * checkProduct.Price;
-            newOrder.Status = "Not Paid";
+            newOrder.Status = OrderStatus.NotPaid;
             newOrder.CreatedAt = DateTime.Now;
             await _context.Orders.AddAsync(newOrder);
             await _context.SaveChangesAsync();
             return Ok(_mapper.Map<OrderReadDTO>(newOrder));
         }
+        
         [HttpPost("confirmPayment")]
         public async Task<IActionResult> ConfirmPayment(Guid orderId)
         {
-            var order = await _context.Orders.FindAsync(orderId);
+            var order = await _context.Orders
+                .Include(o => o.User)
+                .FirstOrDefaultAsync(o => o.Id == orderId); 
+
             if (order == null)
             {
-                return BadRequest("This order is not exist");
+                return BadRequest("This order does not exist");
             }
-            order.Status = "Paid";
+            
+            order.State.OnAccept();
             await _context.SaveChangesAsync();
+    
             return Ok("Confirm order successfully");
         }
+
         [HttpPost("markAsFailedOrder")]
         public async Task<IActionResult> FailedOrder(Guid orderId)
         {
-            var order = await _context.Orders.FindAsync(orderId);
+            var order = await _context.Orders
+                .Include(o => o.User)
+                .FirstOrDefaultAsync(o => o.Id == orderId); 
+
             if (order == null)
             {
-                return BadRequest("This order is not exist");
+                return BadRequest("This order does not exist");
             }
-            order.Status = "Failed";
+            
+            order.State.OnReject();
             await _context.SaveChangesAsync();
             return Ok("Mark this order failed successfully");
         }
         [HttpPost("markAsSuccessOrder")]
         public async Task<IActionResult> SuccessOrder(Guid orderId)
         {
-            var order = await _context.Orders.FindAsync(orderId);
+            var order = await _context.Orders
+                .Include(o => o.User)
+                .FirstOrDefaultAsync(o => o.Id == orderId); 
+
             if (order == null)
             {
-                return BadRequest("This order is not exist");
+                return BadRequest("This order does not exist");
             }
-            order.Status = "Success";
+            
+            order.State.OnAccept();
             await _context.SaveChangesAsync();
             return Ok("Mark this order success successfully");
         }

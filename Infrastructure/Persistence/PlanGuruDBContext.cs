@@ -9,12 +9,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MediatR;
 
 namespace Infrastructure.Persistence
 {
     public class PlanGuruDBContext : DbContext
     {
-        public PlanGuruDBContext(DbContextOptions options) : base(options) { }
+        private readonly IMediator _mediator;
+        
+        public PlanGuruDBContext(DbContextOptions options, IMediator mediator)
+            : base(options)
+        {
+            _mediator = mediator;
+        }
         public DbSet<User> Users { get; set; }
         public DbSet<Post> Posts { get; set; }
         public DbSet<PostUpvote> PostUpvotes { get; set; }
@@ -44,10 +51,33 @@ namespace Infrastructure.Persistence
             return base.SaveChanges();
         }
 
-        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             SetAuditFields();
-            return base.SaveChangesAsync(cancellationToken);
+
+            // Save changes first
+            var result = await base.SaveChangesAsync(cancellationToken);
+
+            // Collect domain events
+            var domainEntities = ChangeTracker.Entries()
+                .Where(e => e.Entity is BaseDomainEntity<Guid> entity && entity.DomainEvents.Any())
+                .Select(e => (BaseDomainEntity<Guid>)e.Entity)
+                .ToList();
+
+            var domainEvents = domainEntities
+                .SelectMany(e => e.DomainEvents)
+                .ToList();
+
+            // Clear after saving
+            domainEntities.ForEach(e => e.ClearDomainEvents());
+
+            // Publish events
+            foreach (var domainEvent in domainEvents)
+            {
+                await _mediator.Publish(domainEvent, cancellationToken);
+            }
+
+            return result;
         }
 
         private void SetAuditFields()
