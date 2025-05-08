@@ -11,17 +11,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddInfrastructure(this IServiceCollection services)
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
+            
             services.AddDbContext<PlanGuruDBContext>(options =>
             {
-                options.UseInMemoryDatabase("InMem");
+                options.UseNpgsql(connectionString);
             });
+            
+            using (var serviceProvider = services.BuildServiceProvider())
+            {
+                var dbContext = serviceProvider.GetRequiredService<PlanGuruDBContext>();
+                dbContext.Database.EnsureCreated(); 
+            }
 
             services.AddPersistence();
             services.AddVoteStrategy();
