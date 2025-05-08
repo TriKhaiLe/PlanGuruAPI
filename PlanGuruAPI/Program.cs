@@ -1,16 +1,8 @@
 ﻿using Application;
-using Application.Common.Interface.Persistence;
-using AutoMapper;
+using Application.Files.Command.UploadSupabaseFile;
 using Domain.Entities;
-using GraphQL;
-using GraphQL.Instrumentation;
 using GraphQL.Server;
-using GraphQL.Types;
-using GraphQL.Utilities;
 using Infrastructure;
-using Infrastructure.Persistence.Repository;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using PlanGuruAPI.GraphQL.Mutations;
@@ -18,8 +10,6 @@ using PlanGuruAPI.GraphQL.Queries;
 using PlanGuruAPI.GraphQL.Schemas;
 using PlanGuruAPI.GraphQL.Types;
 using PlanGuruAPI.Hubs;
-using PlanGuruAPI.Mapping;
-using Serilog;
 
 namespace PlanGuruAPI
 {
@@ -48,6 +38,9 @@ namespace PlanGuruAPI
 
                 c.EnableAnnotations();
             });
+            
+            builder.Services.AddHttpClient<SupabaseFileUploader>();
+            
             builder.Services.AddApplication().AddInfrastructure();
             builder.Services.AddControllers();
 
