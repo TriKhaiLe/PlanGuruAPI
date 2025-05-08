@@ -1,0 +1,26 @@
+﻿version: '3.8'
+
+name: plan-guru
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgresql
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: planguru_db
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 123456
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - plan-guru
+
+volumes:
+  postgres_data:
+
+networks:
+  plan-guru:
+    driver: bridge
