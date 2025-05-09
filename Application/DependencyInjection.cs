@@ -1,14 +1,11 @@
 ﻿using Application.Common.Behavior;
-using FluentValidation;
 using FluentValidation.AspNetCore;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using Application.Files.Command.SaveFile;
+using Application.Files.Command.UploadSupabaseFile;
+using Application.Files.Common.SaveFile;
 
 namespace Application
 {
@@ -22,7 +19,12 @@ namespace Application
                 fv.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly()));
 
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-
+            
+            // // Manual DI registrations for the Adapter pattern
+            services.AddScoped<SupabaseFileUploader>();
+            services.AddScoped<UploadSupabaseFileCommandHandler>();
+            services.AddScoped<IRequestHandler<SaveFileCommand, SaveFileResponse>, UploadSupabaseFileCommandHandlerAdapter>();
+            
             return services;
         }
     }
