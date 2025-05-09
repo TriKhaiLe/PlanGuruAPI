@@ -2,6 +2,7 @@ using Application.Common.Interface.Persistence;
 using Application.PlantPosts.Query.GetPlantPosts;
 using Domain.Entities;
 using Domain.Entities.WikiService;
+using Domain.Impl;
 using Microsoft.AspNetCore.Mvc;
 using PlanGuruAPI.DTOs.WikiDTOs;
 
@@ -47,18 +48,16 @@ namespace PlanGuruAPI.Controllers
                 });
             }
 
-            var wiki = new Wiki
-            {
-                Title = request.Title,
-                Description = request.Description,
-                ThumbnailImageUrl = request.ThumbnailImageUrl,
-                AttachedProducts = attachedProducts,
-                Status = WikiStatus.Pending,
-                AuthorId = Guid.Parse(request.AuthorId),
-                Contributors = new List<User> { author },
-                Upvotes = 0,
-                Downvotes = 0
-            };
+            var wiki = new WikiBuilder()
+                    .WithTitle(request.Title)
+                    .WithDescription(request.Description)
+                    .WithThumbnailImageUrl(request.ThumbnailImageUrl)
+                    .WithAuthor(author)
+                    .WithProducts(attachedProducts)
+                    .WithStatus(WikiStatus.Pending)
+                    .WithInitialVotes()
+                    .Build();
+
 
             bool isSaved = await SaveWikiArticleToDatabaseAsync(wiki);
 
