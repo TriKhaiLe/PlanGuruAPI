@@ -1,23 +1,27 @@
 ﻿using PlanGuruAPI.DTOs.GroupDTOs;
 using PlanGuruAPI.Interfaces;
+using System.Linq;
 
-public class ProfanityFilterHandler : PostApprovalHandler
+namespace PlanGuruAPI.CoR
 {
-    private readonly List<string> bannedWords = new() { "badword", "curse" };
-
-    public override async Task<bool> HandleAsync(CreatePostInGroupRequest request)
+    public class ProfanityFilterHandler : PostApprovalHandler
     {
-        bool containsBannedWord = bannedWords.Any(word =>
-            request.Title.Contains(word, StringComparison.OrdinalIgnoreCase) ||
-            request.Description.Contains(word, StringComparison.OrdinalIgnoreCase)
-        );
+        private readonly List<string> bannedWords = new() { "badword", "curse" };
 
-        if (containsBannedWord)
+        public override async Task<bool> HandleAsync(CreatePostInGroupRequest request)
         {
-            Console.WriteLine("Profanity detected in title or description.");
-            return false;
-        }
+            bool containsBannedWord = bannedWords.Any(word =>
+                request.Title.Contains(word, StringComparison.OrdinalIgnoreCase) ||
+                request.Description.Contains(word, StringComparison.OrdinalIgnoreCase)
+            );
 
-        return await base.HandleAsync(request);
+            if (containsBannedWord)
+            {
+                Console.WriteLine("Profanity detected in title or description.");
+                return false;
+            }
+
+            return await base.HandleAsync(request);
+        }
     }
 }
