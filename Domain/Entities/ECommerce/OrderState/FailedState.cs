@@ -17,7 +17,6 @@ namespace Domain.Entities.ECommerce.OrderState
         private void UpdateState()
         {
             Debug.WriteLine($"Order [{Order.Id}] is in FailedState. No further transitions allowed.");
-            NotifyOrderStatusChanged();
         }
     }
 }
