@@ -2,15 +2,15 @@
 {
     public static class OrderStateFactory
     {
-        public static OrderState CreateState(Order order, OrderStatus status)
+        public static OrderState CreateState(Order order)
         {
-            return status switch
+            return order.Status switch
             {
                 OrderStatus.NotPaid => new NotPaidState(order),
                 OrderStatus.Paid => new PaidState(order),
                 OrderStatus.Failed => new FailedState(order),
                 OrderStatus.Success => new SuccessState(order),
-                _ => throw new InvalidOperationException($"Unsupported order status: {status}")
+                _ => throw new InvalidOperationException($"Unsupported order status: {order.Status}")
             };
         }
     }
