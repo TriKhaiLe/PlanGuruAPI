@@ -119,6 +119,32 @@ namespace PlanGuruAPI.Controllers
                     HasDevoted = hasDevoted  
                 };
 
+                foreach (var reply in comment.Replies)
+                {
+                    var replyVoteStrategy = _voteStrategyFactory.GetStrategy(TargetType.Comment.ToString());
+                    var replyUpvoteCount = await replyVoteStrategy.GetVoteCountAsync(reply.Id, TargetType.Comment, true);
+                    var replyDevoteCount = await replyVoteStrategy.GetVoteCountAsync(reply.Id, TargetType.Comment, false);
+
+                    var hasReplyUpvoted = await replyVoteStrategy.HasUpvotedAsync(userId, reply.Id);
+                    var hasReplyDevoted = await replyVoteStrategy.HasDevotedAsync(userId, reply.Id);
+
+                    var replyCreatedAt = GetPlantPostsQueryHandler.FormatCreatedAt(reply.CreatedAt);
+
+                    var replyDto = new CommentDto
+                    {
+                        CommentId = reply.Id,
+                        UserId = reply.UserId,
+                        Name = reply.User.Name,
+                        Avatar = reply.User.Avatar,
+                        Message = reply.Message,
+                        CreatedAt = replyCreatedAt,
+                        NumberOfUpvote = replyUpvoteCount,
+                        NumberOfDevote = replyDevoteCount,
+                        HasUpvoted = hasReplyUpvoted,
+                        HasDevoted = hasReplyDevoted
+                    };
+                    commentDto.Replies.Add(replyDto);
+                }
                 commentDtos.Add(commentDto);
             }
 
