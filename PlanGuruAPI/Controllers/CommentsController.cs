@@ -3,6 +3,7 @@ using Application.Common.Interface.Persistence;
 using Application.PlantPosts.Query.GetPlantPosts;
 using Application.Votes;
 using Domain.Entities;
+using Infrastructure.Persistence.Repository;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using PlanGuruAPI.DTOs;
@@ -16,13 +17,19 @@ namespace PlanGuruAPI.Controllers
     {
         private readonly ISender _mediator;
         private readonly ICommentRepository _commentRepository;
+        private readonly IPlantPostRepository _postRepository;
+        private readonly IVoteRepository _voteRepository;
+        private readonly IUserRepository _userRepository;
         private readonly VoteStrategyFactory _voteStrategyFactory;
 
-        public CommentsController(ISender mediator, ICommentRepository commentRepository, VoteStrategyFactory voteStrategyFactory)
+        public CommentsController(ISender mediator, ICommentRepository commentRepository, VoteStrategyFactory voteStrategyFactory, IPlantPostRepository postRepository, IVoteRepository voteRepository, IUserRepository userRepository)
         {
             _mediator = mediator;
             _commentRepository = commentRepository;
             _voteStrategyFactory = voteStrategyFactory;
+            _postRepository = postRepository;
+            _voteRepository = voteRepository;
+            _userRepository = userRepository;
         }
 
         [HttpPost]
@@ -121,16 +128,26 @@ namespace PlanGuruAPI.Controllers
         [HttpPost("upvote")]
         public async Task<IActionResult> UpvoteComment([FromBody] UpvoteDto upvoteDto)
         {
+            var comment = await _commentRepository.GetCommentByIdAsync(upvoteDto.TargetId);
+            if (comment == null)
+            {
+                return Ok(new { status = "error", message = "Comment not found" });
+            }
+
             var voteDto = new VoteDto
             {
                 UserId = upvoteDto.UserId,
                 TargetId = upvoteDto.TargetId,
                 TargetType = TargetType.Comment,
-                IsUpvote = true
+                IsUpvote = true,
+                Comment = comment
             };
 
+            var visitor = new UpvoteVisitor(_postRepository, _commentRepository, _voteRepository, _userRepository);
+            voteDto.Accept(visitor, upvoteDto.UserId);
+
             var strategy = _voteStrategyFactory.GetStrategy(voteDto.TargetType.ToString());
-            await strategy.HandleVoteAsync(voteDto.UserId, voteDto.TargetId, voteDto.IsUpvote);
+            //await strategy.HandleVoteAsync(voteDto.UserId, voteDto.TargetId, voteDto.IsUpvote);
 
             var upvoteCount = await strategy.GetVoteCountAsync(voteDto.TargetId, voteDto.TargetType, true);
             var devoteCount = await strategy.GetVoteCountAsync(voteDto.TargetId, voteDto.TargetType, false);
@@ -141,16 +158,26 @@ namespace PlanGuruAPI.Controllers
         [HttpPost("devote")]
         public async Task<IActionResult> DevoteComment([FromBody] DevoteDto devoteDto)
         {
+            var comment = await _commentRepository.GetCommentByIdAsync(devoteDto.TargetId);
+            if (comment == null)
+            {
+                return Ok(new { status = "error", message = "Comment not found" });
+            }
+
             var voteDto = new VoteDto
             {
                 UserId = devoteDto.UserId,
                 TargetId = devoteDto.TargetId,
                 TargetType = TargetType.Comment,
-                IsUpvote = false
+                IsUpvote = false,
+                Comment = comment
             };
 
+            var visitor = new DevoteVisitor(_postRepository, _commentRepository, _voteRepository, _userRepository);
+            voteDto.Accept(visitor, devoteDto.UserId);
+
             var strategy = _voteStrategyFactory.GetStrategy(voteDto.TargetType.ToString());
-            await strategy.HandleVoteAsync(voteDto.UserId, voteDto.TargetId, voteDto.IsUpvote);
+            //await strategy.HandleVoteAsync(voteDto.UserId, voteDto.TargetId, voteDto.IsUpvote);
 
             var upvoteCount = await strategy.GetVoteCountAsync(voteDto.TargetId, voteDto.TargetType, true);
             var devoteCount = await strategy.GetVoteCountAsync(voteDto.TargetId, voteDto.TargetType, false);

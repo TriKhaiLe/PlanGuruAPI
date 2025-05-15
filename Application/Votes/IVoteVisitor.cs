@@ -29,6 +29,11 @@ namespace Application.Votes
             var existingVote = await _voteRepository.GetVoteAsync(userId, post.Id, TargetType.Post);
             var author = await _userRepository.GetByIdAsync(post.UserId);
 
+            if (author == null)
+            {
+                return;
+            }
+
             if (existingVote != null)
             {
                 if (existingVote.IsUpvote == true)
@@ -62,11 +67,30 @@ namespace Application.Votes
 
         public async void VisitComment(Comment comment, Guid userId)
         {
-            var existingUpvote = await _commentRepository.GetCommentUpvoteAsync(userId, comment.Id);
-            if (existingUpvote == null)
+            var existingVote = await _voteRepository.GetVoteAsync(userId, comment.Id, TargetType.Comment);
+
+            if (existingVote != null)
             {
-                await _commentRepository.AddCommentUpvoteAsync(new CommentUpvote { UserId = userId, CommentId = comment.Id, Comment = comment });
+                if (existingVote.IsUpvote == true)
+                {
+                    await _voteRepository.RemoveVoteAsync(existingVote);
+                    return;
+                }
+                else
+                {
+                    await _voteRepository.RemoveVoteAsync(existingVote);
+                }
             }
+
+            var vote = new Vote
+            {
+                UserId = userId,
+                TargetId = comment.Id,
+                TargetType = TargetType.Comment,
+                IsUpvote = true
+            };
+
+            await _voteRepository.AddVoteAsync(vote);
         }
     }
 
@@ -89,6 +113,11 @@ namespace Application.Votes
         {
             var existingVote = await _voteRepository.GetVoteAsync(userId, post.Id, TargetType.Post);
             var author = await _userRepository.GetByIdAsync(post.UserId);
+
+            if (author == null)
+            {
+                return;
+            }
 
             if (existingVote != null)
             {
@@ -123,11 +152,30 @@ namespace Application.Votes
 
         public async void VisitComment(Comment comment, Guid userId)
         {
-            var existingDevote = await _commentRepository.GetCommentDevoteAsync(userId, comment.Id);
-            if (existingDevote == null)
+            var existingVote = await _voteRepository.GetVoteAsync(userId, comment.Id, TargetType.Comment);
+
+            if (existingVote != null)
             {
-                await _commentRepository.AddCommentDevoteAsync(new CommentDevote { UserId = userId, CommentId = comment.Id, Comment = comment });
+                if (existingVote.IsUpvote == false)
+                {
+                    await _voteRepository.RemoveVoteAsync(existingVote);
+                    return;
+                }
+                else
+                {
+                    await _voteRepository.RemoveVoteAsync(existingVote);
+                }
             }
+
+            var vote = new Vote
+            {
+                UserId = userId,
+                TargetId = comment.Id,
+                TargetType = TargetType.Comment,
+                IsUpvote = false
+            };
+
+            await _voteRepository.AddVoteAsync(vote);
         }
     }
 }
