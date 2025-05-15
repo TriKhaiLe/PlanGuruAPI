@@ -266,7 +266,7 @@ namespace Infrastructure
                                 TotalPrice = item.Price,
                                 Quantity = 3,
                                 ShippingAddress = "99 Nguyễn Văn Trỗi Dĩ An Bình Dương",
-                                Status = "Not Paid"
+                                Status = OrderStatus.NotPaid
                             };
                             context.Orders.Add(order);
                         }
@@ -287,7 +287,7 @@ namespace Infrastructure
                                 TotalPrice = item.Price,
                                 Quantity = 3,
                                 ShippingAddress = "99 Nguyễn Văn Trỗi Dĩ An Bình Dương",
-                                Status = "Paid"
+                                Status = OrderStatus.Paid
                             };
                             context.Orders.Add(order);
                         }
@@ -308,7 +308,7 @@ namespace Infrastructure
                                 Quantity = 3,
                                 TotalPrice = item.Price,
                                 ShippingAddress = "99 Nguyễn Văn Trỗi Dĩ An Bình Dương",
-                                Status = "Success"
+                                Status = OrderStatus.Success
                             };
                             context.Orders.Add(order);
                         }
