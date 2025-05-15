@@ -83,7 +83,7 @@ namespace Infrastructure.Persistence.Repository
             }
 
             // Step 4: Return root-level comments (no parent)
-            return lookup[null];
+            return lookup[parentCommentId];
         }
 
         public async Task UpdateCommentAsync(Comment comment)

@@ -195,7 +195,7 @@ namespace PlanGuruAPI.Controllers
             }
 
             // Check if the parent comment is already a reply to another comment
-            if (parentComment.ParentCommentId != Guid.Empty)
+            if (parentComment.ParentCommentId != Guid.Empty && parentComment.ParentCommentId != null)
             {
                 var grandParentComment = await _commentRepository.GetCommentByIdAsync(parentComment.ParentCommentId);
                 if (grandParentComment?.ParentCommentId != Guid.Empty)
