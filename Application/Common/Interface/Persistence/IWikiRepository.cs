@@ -21,5 +21,6 @@ namespace Application.Common.Interface.Persistence
         Task<bool> RejectContributionAsync(Guid wikiId, Guid contributionId, string reason);
         Task<List<Contribution>> GetContributionHistoryAsync(Guid wikiId);
         Task AddContributionAsync(Contribution contribution);
+        Task<bool> RevertContributorAsync(Guid wikiId, Guid contributionId);
     }
 }

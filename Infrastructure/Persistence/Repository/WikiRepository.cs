@@ -127,5 +127,40 @@ namespace Infrastructure.Persistence.Repository
             await _context.Contributions.AddAsync(contribution);
             await _context.SaveChangesAsync();
         }
+
+        // Undo approval of a contribution and revert contributor if they were just added
+        public async Task<bool> RevertContributorAsync(Guid wikiId, Guid contributionId)
+        {
+            var wiki = await GetByIdAsync(wikiId);
+            if (wiki == null)
+                return false;
+
+            var contribution = wiki.Contributions.FirstOrDefault(c => c.Id == contributionId);
+            if (contribution == null)
+                return false;
+
+            var contributorId = contribution.ContributorId;
+
+            // Only revert if the contributor was just added by the last approval:
+            // check exist contributor in this wiki & count number of contribution = 1
+            var wasContributorJustAdded = wiki.Contributors.Any(u => u.Id == contributorId) &&
+                wiki.Contributions.Count(c => c.ContributorId == contributorId && c.Status == ContributionStatus.Approved) == 1;
+
+            // Set contribution status back to Pending
+            contribution.Status = ContributionStatus.Pending;
+
+            // Remove contributor if they were just added by this approval
+            if (wasContributorJustAdded)
+            {
+                var userToRemove = wiki.Contributors.FirstOrDefault(u => u.Id == contributorId);
+                if (userToRemove != null)
+                {
+                    wiki.Contributors.Remove(userToRemove);
+                }
+            }
+
+            await UpdateWikiAsync(wiki, wiki.AttachedProducts?.Select(p => p.Id).ToList() ?? new List<Guid>());
+            return true;
+        }
     }
 }

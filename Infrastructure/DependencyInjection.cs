@@ -40,6 +40,7 @@ namespace Infrastructure
             services.AddScoped<IVoteRepository, VoteRepository>();
             services.AddScoped<IQuizManager, QuizServices>();
             services.AddScoped<IOrderRepository, OrderRepository>();
+            services.AddSingleton<Application.Wikies.WikiCommandManager>();
 
             return services;
         }

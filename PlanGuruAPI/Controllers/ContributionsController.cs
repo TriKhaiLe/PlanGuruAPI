@@ -1,13 +1,11 @@
-using Application.Common.Interface.Persistence;
-using Domain.Entities.WikiEntities;
-using Domain.Entities.WikiService;
-using Microsoft.AspNetCore.Mvc;
-using PlanGuruAPI.DTOs.WikiDTOs;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using Application.Common.Interface.Persistence;
+using Application.Wikies.Commands;
 using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
+using Domain.Entities.WikiEntities;
+using Microsoft.AspNetCore.Mvc;
+using PlanGuruAPI.DTOs.WikiDTOs;
+using Application.Wikies;
 
 namespace PlanGuruAPI.Controllers
 {
@@ -16,22 +14,26 @@ namespace PlanGuruAPI.Controllers
     public class ContributionsController : ControllerBase
     {
         private readonly IWikiRepository _wikiRepository;
+        private readonly WikiCommandManager _invoker;
 
-        public ContributionsController(IWikiRepository wikiRepository)
+        public ContributionsController(IWikiRepository wikiRepository, WikiCommandManager invoker)
         {
             _wikiRepository = wikiRepository;
+            _invoker = invoker;
         }
 
         [HttpPost("{wikiId}/contributions/{contributionId}/approve")]
         public async Task<IActionResult> ApproveContribution(Guid wikiId, Guid contributionId)
         {
-            var result = await _wikiRepository.ApproveContributionAsync(wikiId, contributionId);
-            if (!result)
-            {
-                return BadRequest("Failed to approve contribution");
-            }
+            var approveCommand = new ApproveContributionCommand(_wikiRepository, wikiId, contributionId);
+            _invoker.SetCommand(approveCommand);
+            await _invoker.ExecuteCommandAsync();
 
             var updatedWiki = await _wikiRepository.GetByIdAsync(wikiId);
+            if (updatedWiki == null)
+            {
+                return NotFound("Wiki not found");
+            }
 
             var wikiDto = new
             {
@@ -40,6 +42,33 @@ namespace PlanGuruAPI.Controllers
             };
 
             return Ok(wikiDto);
+        }
+
+        [HttpPost("{wikiId}/contributions/undo-last-operation")]
+        public async Task<IActionResult> UndoLastOperation(Guid wikiId)
+        {
+            // Use shared invoker instance for undo
+            var undoResult = await _invoker.UndoLastCommandAsync();
+
+            if (!undoResult.Success)
+            {
+                return Ok(new UndoResponse
+                {
+                    Msg = undoResult.Message
+                });
+            }
+
+            // Lấy thông tin phiên bản hiện tại sau khi undo
+            var updatedWiki = await _wikiRepository.GetByIdAsync(wikiId);
+
+            var result = new UndoResponse(
+                undoResult.Message,
+                _invoker.CanUndo,
+                updatedWiki?.Content,
+                updatedWiki?.Contributors?.Count ?? 0
+            );
+
+            return Ok(result);
         }
 
         [HttpGet("{wikiId}/pending-contributions")]
@@ -93,13 +122,23 @@ namespace PlanGuruAPI.Controllers
         [HttpPost("{wikiId}/contributions/{contributionId}/reject")]
         public async Task<IActionResult> RejectContribution(Guid wikiId, Guid contributionId, [FromBody] string reason)
         {
-            var result = await _wikiRepository.RejectContributionAsync(wikiId, contributionId, reason);
-            if (!result)
+            var rejectCommand = new RejectContributionCommand(_wikiRepository, wikiId, contributionId, reason);
+            _invoker.SetCommand(rejectCommand);
+            await _invoker.ExecuteCommandAsync();
+
+            var updatedWiki = await _wikiRepository.GetByIdAsync(wikiId);
+            if (updatedWiki == null)
             {
-                return BadRequest("Failed to reject contribution");
+                return NotFound("Wiki not found");
             }
 
-            return Ok("Contribution rejected successfully");
+            var wikiDto = new
+            {
+                updatedWiki.Content,
+                ContributorsCount = updatedWiki.Contributors.Count,
+            };
+
+            return Ok(wikiDto);
         }
 
         [HttpGet("{wikiId}/contribution-history")]
@@ -141,5 +180,4 @@ namespace PlanGuruAPI.Controllers
             return Ok(contributionDto);
         }
     }
-
 }
