@@ -33,7 +33,12 @@ public class GmailSmtpEmailService(IConfiguration configuration) : IEmailService
 
                 foreach (var recipient in request.To)
                 {
-                    message.To.Add(recipient.Email);
+                    message.To.Add(recipient);
+                }
+                
+                foreach (var bcc in request.Bcc)
+                {
+                    message.Bcc.Add(bcc);
                 }
             
                 using (message)

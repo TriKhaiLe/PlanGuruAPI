@@ -11,8 +11,17 @@ namespace Domain.Entities.ECommerce
         public int Quantity { get; set; }
         public double TotalPrice { get; set; }
         public string ShippingAddress { get; set; }
-        public OrderStatus Status { get; set; }      
-        public OrderState.OrderState State => OrderStateFactory.CreateState(this);
+        public OrderStatus Status { get; set; }
+        private OrderState.OrderState State => OrderStateFactory.CreateState(this);
+
+        public void ChangeToAcceptState()
+        {
+            State.ChangeToAcceptState();
+        }
+
+        public void ChangeToRejectState()
+        {
+            State.ChangeToRejectState();
+        }
     }
 }
-

@@ -1,18 +1,41 @@
-﻿namespace Domain.Entities.ECommerce.OrderState
+﻿using Domain.Entities.ECommerce.Events;
+
+namespace Domain.Entities.ECommerce.OrderState
 {
     public abstract class OrderState(Order order)
     {
         protected Order Order { get; } = order;
 
-        public abstract void OnAccept();
-        public abstract void OnReject();
+        protected abstract void OnAccept();
+        protected abstract void OnReject();
 
-        protected void NotifyOrderStatusChanged()
+        public void ChangeToAcceptState()
         {
-            Order.AddDomainEvent(new OrderStatusChangedEvent(
-                Order.Id,
-                Order.User.Email,
-                Order.Status
+            OnAccept();
+            
+            if (IsNeedToNotifyWhenAccept)
+            {
+                NotifyOrderStatusChanged();
+            }   
+        }
+        
+        public void ChangeToRejectState()
+        {
+            OnReject();
+
+            if (IsNeedToNotifyWhenReject)
+            {
+                NotifyOrderStatusChanged();
+            }
+        }
+
+        protected virtual bool IsNeedToNotifyWhenAccept => true;
+        protected virtual bool IsNeedToNotifyWhenReject => true;
+        
+        private void NotifyOrderStatusChanged()
+        {
+            Order.AddDomainEvent(new CancelOrderEvent(
+                Order.Id
             ));
         }
     }

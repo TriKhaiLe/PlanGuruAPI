@@ -12,6 +12,8 @@ namespace PlanGuruAPI.DTOs.ProductDTOs
         public double Price { get; set; } = 0.0;
         public string Description { get; set; } = string.Empty;
 
+        public int Sold { get; set; } = 0;
+
         public Guid SellerId { get; set; }
         public Guid WikiId { get; set; }
 

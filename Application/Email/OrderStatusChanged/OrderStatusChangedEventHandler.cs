@@ -1,6 +1,5 @@
 ﻿using Application.Email.Common;
-
-using Domain.Entities.ECommerce.OrderState;
+using Domain.Entities.ECommerce.Events;
 using MediatR;
 
 namespace Application.Email.OrderStatusChanged
@@ -12,17 +11,17 @@ namespace Application.Email.OrderStatusChanged
         
         public Task Handle(OrderStatusChangedEvent notification, CancellationToken cancellationToken)
         {
-            var message = $"Your order {notification.OrderId} is now {notification.NewStatus}.";
+            var message = $"Order {notification.OrderId} is now at {notification.NewStatus}.";
             
             var emailRequest = new EmailRequest
             {
                 Subject = Subject,
                 HtmlContent = message,
-                To = [new Recipient { Email = notification.Email }]
+                To = [notification.CustomerEmail],
+                Bcc = [notification.SellerEmail]
             };
 
             return emailService.SendMailAsync(emailRequest);
         }
     }
 }
-
