@@ -1,16 +1,10 @@
 ﻿using Application;
-using Application.Common.Interface.Persistence;
-using AutoMapper;
+using Application.Orders.Job;
 using Domain.Entities;
-using GraphQL;
-using GraphQL.Instrumentation;
 using GraphQL.Server;
-using GraphQL.Types;
-using GraphQL.Utilities;
+using Hangfire;
+using Hangfire.MemoryStorage;
 using Infrastructure;
-using Infrastructure.Persistence.Repository;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using PlanGuruAPI.GraphQL.Mutations;
@@ -18,8 +12,6 @@ using PlanGuruAPI.GraphQL.Queries;
 using PlanGuruAPI.GraphQL.Schemas;
 using PlanGuruAPI.GraphQL.Types;
 using PlanGuruAPI.Hubs;
-using PlanGuruAPI.Mapping;
-using Serilog;
 
 namespace PlanGuruAPI
 {
@@ -86,8 +78,16 @@ namespace PlanGuruAPI
                           .AllowCredentials();          // Allow cookies/auth tokens
                 });
             });
-
-
+            
+            builder.Services.AddHangfire(config =>
+            {
+                config.UseMemoryStorage();
+            });
+            
+            builder.Services.AddHangfireServer();
+            
+            builder.Services.AddScoped<CancelOrderJob>();
+            
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

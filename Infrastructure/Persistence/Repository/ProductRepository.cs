@@ -47,5 +47,12 @@ namespace Infrastructure.Persistence.Repository
                 return [];
             }
         }
+
+        public async Task<Product?> GetProductByIdAsync(Guid productId)
+        {
+            return await _context.Products
+                .Include(product => product.Seller)
+                .FirstOrDefaultAsync(order => order.Id == productId);
+        }
     }
 }

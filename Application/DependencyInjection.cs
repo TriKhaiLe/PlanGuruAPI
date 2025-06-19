@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Application.Email.OrderStatusChanged;
 
 namespace Application
 {
@@ -22,6 +23,7 @@ namespace Application
                 fv.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly()));
 
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+            services.AddTransient<IEmailService, GmailSmtpEmailService>();
 
             return services;
         }

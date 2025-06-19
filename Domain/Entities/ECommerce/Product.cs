@@ -19,6 +19,7 @@ namespace Domain.Entities.ECommerce
         public Guid? WikiId { get; set; }
         public virtual Wiki? Wiki { get; set; }
         public ICollection<ProductImages> ProductImages { get; set; }
-
+        
+        public int Sold { get; set; } = 0;
     }
 }

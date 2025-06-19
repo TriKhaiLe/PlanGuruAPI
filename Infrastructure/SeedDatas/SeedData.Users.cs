@@ -95,6 +95,14 @@ namespace Infrastructure
                 Avatar = "https://www.vietnamworks.com/hrinsider/wp-content/uploads/2023/12/avatar-den-ngau-011.jpg",
                 Name = "Tùng Đoàn"
             };
+            User user4 = new User()
+            {
+                UserId = Guid.NewGuid(),
+                Email = "21520339@gm.uit.edu.vn",
+                Password = "123456",
+                Avatar = "https://www.vietnamworks.com/hrinsider/wp-content/uploads/2023/12/avatar-den-ngau-011.jpg",
+                Name = "Mai Nguyễn"
+            };
             User admin = new User()
             {
                 UserId = Guid.NewGuid(),
@@ -105,11 +113,10 @@ namespace Infrastructure
             };
             context.Users.Add(user2);
             context.Users.Add(user3);
+            context.Users.Add(user4);
             context.Users.Add(admin);
             context.Users.AddRange(listUser);   
             context.SaveChanges();
-
-
         }
     }
 }

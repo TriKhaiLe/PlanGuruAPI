@@ -1,9 +1,4 @@
 ﻿using Domain.Entities.ECommerce;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Common.Interface.Persistence
 {
@@ -12,5 +7,6 @@ namespace Application.Common.Interface.Persistence
         Task<List<Product>> GetProductsByIdsAsync(IEnumerable<string> productIds);
         // GetFirstNProductsAsync
         Task<List<Product>> GetFirstNProductsAsync(int n);
+        Task<Product?> GetProductByIdAsync(Guid productId);
     }
 }
