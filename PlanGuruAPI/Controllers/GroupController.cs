@@ -325,9 +325,49 @@ namespace PlanGuruAPI.Controllers
                 return BadRequest("Can't find this group");
             }
 
+            if (string.IsNullOrWhiteSpace(request.Title) || request.Title.Length > 200)
+            {
+                return BadRequest("Invalid title");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Description) || request.Description.Length > 2000)
+            {
+                return BadRequest("Invalid description");
+            }
+
+            string[] bannedWords = { "đm", "vcl", "cc", "shit", "fuck" };
+            bool containsBadWords = bannedWords.Any(word =>
+                request.Title.ToLower().Contains(word) || request.Description.ToLower().Contains(word));
+
+            if (containsBadWords)
+            {
+                return BadRequest("Your post contains inappropriate words.");
+            }
+
+            if (request.Images == null || !request.Images.Any())
+            {
+                return BadRequest("At least one image is required.");
+            }
+
+            var allowedExtensions = new List<string> { ".jpg", ".jpeg", ".png" };
+
+            foreach (var image in request.Images)
+            {
+                if (string.IsNullOrWhiteSpace(image))
+                {
+                    return BadRequest("One or more image names are empty.");
+                }
+
+                var extension = Path.GetExtension(image).ToLowerInvariant();
+                if (!allowedExtensions.Contains(extension))
+                {
+                    return BadRequest($"Invalid image format for '{image}'. Only JPG, JPEG, and PNG are allowed.");
+                }
+            }
+
             var post = new Post
             {
-                Id = new Guid(),
+                Id = Guid.NewGuid(),
                 Title = request.Title,
                 Description = request.Description,
                 UserId = request.UserId,
@@ -339,7 +379,7 @@ namespace PlanGuruAPI.Controllers
                 LastModifiedAt = DateTime.UtcNow
             };
 
-            _context.Posts.Add(post);   
+            _context.Posts.Add(post);
 
             foreach (var item in request.Images)
             {
@@ -352,9 +392,9 @@ namespace PlanGuruAPI.Controllers
                 _context.PostImages.Add(postImage);
             }
 
-            await _context.SaveChangesAsync();  
-
-            return Ok("Post created successfully, wating for admin approve");
+            await _context.SaveChangesAsync();
+            return Ok("Post created successfully, waiting for admin approval");
         }
+
     }
 }
