@@ -86,7 +86,7 @@ namespace PlanGuruAPI
             
             builder.Services.AddHangfireServer();
             
-            builder.Services.AddScoped<OrderExpirationJob>();
+            builder.Services.AddScoped<CancelOrderJob>();
             
             var app = builder.Build();
 

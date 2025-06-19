@@ -10,7 +10,7 @@ namespace Application.Orders.CancelOrder
     {
         public Task Handle(CancelOrderEvent notification, CancellationToken cancellationToken)
         {
-            backgroundJobClient.Schedule<OrderExpirationJob>(
+            backgroundJobClient.Schedule<CancelOrderJob>(
                 job => job.HandleAsync(notification.OrderId),
                 TimeSpan.FromMinutes(5)
             );

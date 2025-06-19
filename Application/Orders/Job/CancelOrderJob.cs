@@ -3,7 +3,7 @@ using Domain.Entities.ECommerce;
 
 namespace Application.Orders.Job;
 
-public class OrderExpirationJob(IOrderRepository orderRepository)
+public class CancelOrderJob(IOrderRepository orderRepository)
 {
     public async Task HandleAsync(Guid orderId)
     {
