@@ -34,8 +34,11 @@ namespace Domain.Entities.ECommerce.OrderState
         
         private void NotifyOrderStatusChanged()
         {
-            Order.AddDomainEvent(new CancelOrderEvent(
-                Order.Id
+            Order.AddDomainEvent(new OrderStatusChangedEvent(
+                Order.Id,
+                Order.Product.Seller.Email,
+                Order.User.Email,
+                Order.Status
             ));
         }
     }
