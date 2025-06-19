@@ -15,11 +15,8 @@ namespace Domain.Entities.ECommerce.OrderState
 
             Order.Status = OrderStatus.NotPaid;
             
-            Order.AddDomainEvent(new OrderStatusChangedEvent(
-                Order.Id,
-                Order.Product.Seller.Email,
-                Order.User.Email,
-                Order.Status
+            Order.AddDomainEvent(new CancelOrderEvent(
+                Order.Id
             ));
         }
 
