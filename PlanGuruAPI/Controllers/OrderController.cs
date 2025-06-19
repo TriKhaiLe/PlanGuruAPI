@@ -102,7 +102,7 @@ namespace PlanGuruAPI.Controllers
         }
         
         [HttpPost("accept")]
-        public async Task<IActionResult> ConfirmPayment(Guid orderId)
+        public async Task<IActionResult> AcceptState(Guid orderId)
         {
             var order = await _orderRepository.GetByIdAsync(orderId);
             if (order == null)
@@ -118,7 +118,7 @@ namespace PlanGuruAPI.Controllers
         }
         
         [HttpPost("reject")]
-        public async Task<IActionResult> FailedOrder(Guid orderId)
+        public async Task<IActionResult> RejectState(Guid orderId)
         {
             var order = await _orderRepository.GetByIdAsync(orderId);
             if (order == null)
